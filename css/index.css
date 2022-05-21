@@ -6,3 +6,109 @@
 .hidden {
     display: none;
 }
+
+form > div {
+    border-bottom: 1px solid #ccc;
+    position: relative;
+}
+
+[type="text"],
+select {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding-top: 1.5rem;
+    width: 100%;
+}
+
+select {
+    cursor: pointer;
+}
+
+select:disabled {
+    cursor: default;
+}
+
+[type="radio"] {
+    cursor: pointer;
+}
+
+[type="text"] + label,
+select + label {
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+[type="text"] + label {
+    cursor: text;
+}
+
+select + label,
+[type="radio"] + label {
+    cursor: pointer;
+}
+
+select:disabled + label {
+    cursor: default;
+}
+
+[type="submit"] {
+    margin-top: 1rem;
+}
+
+#loading-dialog {
+    background-color: transparent;
+    border: none;
+}
+
+#loading-dialog::backdrop {
+    backdrop-filter: blur(.5rem);
+}
+
+#spinner,
+#spinner::before,
+#spinner::after {
+    animation: load7 1.8s infinite ease-in-out;
+    animation-fill-mode: both;
+    border-radius: 50%;
+    height: 2.5em;
+    width: 2.5em;
+}
+
+#spinner {
+    animation-delay: -0.16s;
+    color: #fff;
+    font-size: 10px;
+    margin: 80px auto;
+    position: relative;
+    text-indent: -9999em;
+    transform: translateZ(0);
+}
+
+#spinner::before,
+#spinner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+}
+
+#spinner::before {
+    animation-delay: -.32s;
+    left: -3.5em;
+}
+
+#spinner::after {
+    left: 3.5em;
+}
+
+@keyframes load7 {
+    0%,
+    80%,
+    100% {
+        box-shadow: 0 2.5em 0 -1.3em;
+    }
+    40% {
+        box-shadow: 0 2.5em 0 0;
+    }
+}

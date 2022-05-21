@@ -2,13 +2,17 @@
 
 if (!defined("common")) {
     define("ROOT_DIR", __DIR__ ."/..");
-    define("common", __DIR__ ."common.php");
+    define("common", __DIR__ ."/common.php");
     define("Fetch", __DIR__ ."/Fetch.php");
     define("HttpMethod", __DIR__ ."/HttpMethod.php");
 
     define("EUC_JP", "EUC-JP");
     define("UTF_8", "UTF-8");
 
+    /**
+     * 200 OK
+     */
+    define("HTTP_RESPONSE_CODE_OK", 200);
     /**
      * 201 Created
      */

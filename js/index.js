@@ -1,188 +1,127 @@
-import CondGet from "./CondGet.js";
-import Train from "./Train.js";
-import TraTtGet from "./TraTtGet.js";
-
 window.addEventListener('DOMContentLoaded', () => {
-    const hiddenClass = 'hidden';
+    const loadingDialog = document.querySelector('#loading-dialog');
+    const progressBar = document.querySelector('#progress');
 
-    const cond2Elem = document.querySelector('#cond2');
-    const cond3Elem = document.querySelector('#cond3');
-    const RLsElem = document.querySelector('#RLs');
-    const PGsElem = document.querySelector('#PGs');
+    const hidden = 'hidden';
 
-    function cursorWait() {
-        document.body.style.cursor = 'wait';
-    }
-
-    function cursorDefault() {
-        document.body.style.cursor = 'default';
-    }
-
-    /**
-     * 
-     * @param {Number} second 
-     */
-    function sleep(second) {
-        return new Promise(resolve => setTimeout(resolve, second * 1000));
-    }
-
-    function setCond2(options) {
-        RLsElem.textContent = '';
-        cond2Elem.classList.remove(hiddenClass);
-
-        options.forEach(option => {
-            // console.log(option);
-            const liElem = document.createElement('li');
-            const checkboxElem = document.createElement('input');
-            checkboxElem.setAttribute('type', 'checkbox');
-            checkboxElem.id = `RL-${option.rl}`;
-            checkboxElem.value = option.rl;
-            liElem.appendChild(checkboxElem);
-            const labelElem = document.createElement('label');
-            labelElem.setAttribute(`for`, `RL-${option.rl}`);
-            labelElem.textContent = option.name;
-            liElem.appendChild(labelElem);
-            RLsElem.appendChild(liElem);
+    async function getRouteName() {
+        document.querySelectorAll('main > section:nth-child(n + 2)').forEach(elem => {
+            elem.classList.add(hidden);
         });
-    }
 
-    /**
-     * 
-     * @param {Object} PGs 
-     * @param {String} name 
-     * @param {String} rl
-     */
-    function setCond3(PGs, name, rl) {
-        const h3Elem = document.createElement('h3');
-        h3Elem.textContent = name;
-        PGsElem.appendChild(h3Elem);
-        const ulElem = document.createElement('ul');
-
-        PGs.forEach(pg => {
-            // console.log(pg);
-            const liElem = document.createElement('li');
-            const checkboxElem = document.createElement('input');
-            checkboxElem.setAttribute('type', 'checkbox');
-            checkboxElem.id = `PG-${pg.rl}`;
-            checkboxElem.dataset.rl = rl;
-            checkboxElem.dataset.pg = pg.rl;
-            liElem.appendChild(checkboxElem);
-            const labelElem = document.createElement('label');
-            labelElem.setAttribute('for', `PG-${pg.rl}`);
-            labelElem.textContent = pg.name;
-            liElem.appendChild(labelElem);
-            ulElem.appendChild(liElem);
-        });
-        PGsElem.appendChild(ulElem);
-    }
-
-    /**
-     * 
-     * @param {Array} baseStations 
-     * @param {Array} newStations 
-     * @returns 
-     */
-    function setStationList(baseStations, newStations) {
-        console.log(baseStations, newStations);
-        if (baseStations.length === 0) {
-            return newStations;
-        }
-        const baseStationContain = baseStations.filter(baseStation => {
-            for (let newStation of newStations) {
-                if (baseStation['id'] === newStation['id']) {
-                    return true;
-                }
-            }
-            return false;
-        });
-        console.log(baseStationContain);
-    }
-
-    document.querySelector('#cond').addEventListener('submit', async e => {
-        e.preventDefault();
-
-        cond2Elem.classList.add(hiddenClass);
-        cond3Elem.classList.add(hiddenClass);
-
-        const RL = document.querySelector('#RL').value;
-        const condGet = new CondGet(RL);
-        await condGet.init();
-        if (condGet.hasOption) {
-            // console.log(condGet);
-            setCond2(condGet.options);
+        const name = document.querySelector('#route-name').value;
+        if (name.length === 0) {
+            alert('路線名を入力してください。');
             return;
         }
-        if (condGet.hasHidden) {
-            // console.log(condGet);
-            PGsElem.textContent = '';
-            cond3Elem.classList.remove(hiddenClass);
-            setCond3(condGet.PGs, condGet.lineName, condGet.RL);
+
+        loadingDialog.showModal();
+
+        const response = await fetch(`./api/route-names?name=${name}`);
+        const json = await response.json();
+        if (json.length === 0) {
+            loadingDialog.close();
+            alert('路線が見つかりませんでした。');
             return;
         }
-        alert('路線が見つかりませんでした。\n別の文言で検索してください。');
-    });
 
-    cond2Elem.addEventListener('submit', async e => {
-        e.preventDefault();
+        console.log(json);
 
-        PGsElem.textContent = '';
-        cond3Elem.classList.remove(hiddenClass);
-
-        const rls = [];
-        RLsElem.querySelectorAll('[type="checkbox"]:checked').forEach(checkbox => {
-            rls.push(checkbox);
+        const routeListElem = document.querySelector('#route-list');
+        routeListElem.textContent = '';
+        json.forEach(item => {
+            const optionElem = document.createElement('option');
+            optionElem.value = item.id;
+            optionElem.textContent = item.name;
+            routeListElem.appendChild(optionElem);
         });
-        // console.log(rls);
-
-        cursorWait();
-
-        for (const checkbox of rls) {
-            const RL = checkbox.value;
-
-            const condGet = new CondGet(RL);
-            await condGet.init();
-            // console.log(condGet);
-            setCond3(condGet.PGs, document.querySelector(`[for="${checkbox.id}"]`).textContent, RL);
-            await sleep(1);
+        routeListElem.focus();
+        loadingDialog.close();
+        if (json.length === 1) {
+            routeListElem['disabled'] = true;
+            getTimetableList();
         }
+        document.querySelector('#route-list-section').classList.remove(hidden);
+    }
 
-        cursorDefault();
-    });
-
-    cond3Elem.addEventListener('submit', async e => {
-        e.preventDefault();
-
-        const pgs = [];
-        PGsElem.querySelectorAll('[type="checkbox"]:checked').forEach(checkbox => {
-            pgs.push(checkbox);
+    async function getTimetableList() {
+        document.querySelectorAll('main > section:nth-child(n + 3)').forEach(elem => {
+            elem.classList.add(hidden);
         });
 
-        cursorWait();
+        loadingDialog.showModal();
 
-        const trainNumbersTmp = [];
-        let stations = [];
-        for (const checkbox of pgs) {
-            const RL = checkbox.dataset.rl;
-            const PG = checkbox.dataset.pg;
-            const traTtGet = new TraTtGet(RL, PG);
-            await traTtGet.init();
-            trainNumbersTmp.push(...traTtGet.getTrainNumbers().TRs);
-            // console.log(trainNumbers);
+        const id = document.querySelector('#route-list').value;
+        const response = await fetch(`./api/timetables?id=${id}`);
+        const json = await response.json();
+        console.log(json);
 
-            stations = setStationList(stations, traTtGet.getStations().stations);
+        const timetableListElem = document.querySelector('#timetable-list');
+        timetableListElem.textContent = '';
+        const template = document.querySelector('#timetable-list-template');
+        json.forEach(item => {
+            const clone = template.content.cloneNode(true);
+            const id = `timetable-${item.number}`;
+            clone.querySelector('[type="radio"]').id = id;
+            clone.querySelector('[type="radio"]').value = item.number;
+            clone.querySelector('label').setAttribute('for', id);
+            clone.querySelector('label').textContent = item.name;
+            timetableListElem.appendChild(clone);
+        });
+        document.querySelector('#timetable-list-section').classList.remove(hidden);
 
-            await sleep(1);
+        loadingDialog.close();
+    }
+
+    async function getTrins() {
+        document.querySelectorAll('main > section:nth-child(n + 4)').forEach(elem => {
+            elem.classList.add(hidden);
+        });
+
+        loadingDialog.showModal();
+
+        const id = document.querySelector('#route-list').value;
+        const number = document.querySelector('[name="timetable"]:checked').value;
+        const countResponse = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}&count=true`);
+        const countJson = await countResponse.json();
+        console.log(countJson);
+
+        if (!confirm(`列車情報取得まで${countJson.count}秒かかります。\n取得を実施しますか？`)) {
+            loadingDialog.close();
+            return;
         }
-        const trainNumbers = [...new Set(trainNumbersTmp)];
-        // console.log(trainNumbers);
 
-        for (const TR of trainNumbers) {
-            // const train = new Train(TR);
-            // await train.init();
-            await sleep(1);
-            break;
-        }
+        progressBar.setAttribute('max', countJson.count + 5);
 
-        cursorDefault();
+        let i = 0;
+        const interval = setInterval(() => {
+            progressBar.value = i;
+            i++;
+        }, 1000);
+
+        const response = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}`);
+        const text = await response.text();
+        clearInterval(interval);
+        console.log(text);
+
+        loadingDialog.close();
+
+        sessionStorage.setItem('trains', text);
+        location.href = 'timetable.html';
+    }
+
+    document.querySelector('#route-name-form').addEventListener('submit', e => {
+        e.preventDefault();
+        getRouteName();
+    });
+
+    document.querySelector('#route-list-form').addEventListener('submit', e => {
+        e.preventDefault();
+        getTimetableList();
+    });
+
+    document.querySelector('#timetable-list-form').addEventListener('submit', e => {
+        e.preventDefault();
+        getTrins();
     });
 });

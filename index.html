@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Document</title>
+<title>Get トレたび</title>
 <link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
@@ -13,39 +13,49 @@
 </header>
 
 <main>
-  <form action="" method="post" id="cond">
-    <h2>Cond</h2>
-    <div>
-      <input type="text" name="RL" id="RL" value="京急本線">
-      <label for="RL">路線</label>
-    </div>
-    <div>
+  <section>
+    <h2>路線名検索</h2>
+    <form action="./api/route-name/" method="get" id="route-name-form">
+      <div>
+        <input type="text" name="name" id="route-name" required autofocus>
+        <label for="route-name">路線名</label>
+      </div>
       <button type="submit">検索</button>
-    </div>
-  </form>
+    </form>
+  </section>
 
-  <form action="" method="post" id="cond2" class="hidden">
-    <h2>Cond2</h2>
-    <div>
-      <ul id="RLs"></ul>
-    </div>
-    <div>
+  <section id="route-list-section" class="hidden">
+    <h2>路線</h2>
+    <form action="" method="get" id="route-list-form">
+      <div>
+        <select name="route-id" id="route-list" required></select>
+        <label for="route-list">路線</label>
+      </div>
       <button type="submit">検索</button>
-    </div>
-  </form>
+    </form>
+  </section>
 
-  <form action="" method="post" id="cond3" class="hidden">
-    <h2>Cond3</h2>
-    <div>
-      <ul id="PGs"></ul>
-    </div>
-    <div>
-      <button type="submit">表示</button>
-    </div>
-  </form>
+  <section id="timetable-list-section" class="hidden">
+    <h2>時刻表選択</h2>
+    <form action="" method="get" id="timetable-list-form">
+      <ul id="timetable-list"></ul>
+      <button type="submit">取得</button>
+    </form>
+  </section>
 </main>
 
-<script type="module" src="./js/index.js"></script>
+<template id="timetable-list-template">
+  <li><input type="radio" name="timetable" id="" required><label for=""></label></li>
+</template>
+
+<dialog id="loading-dialog">
+  <div id="spinner"></div>
+  <div>
+    <progress id="progress"></progress>
+  </div>
+</dialog>
+
+<script src="./js/index.js"></script>
 
 </body>
 </html>

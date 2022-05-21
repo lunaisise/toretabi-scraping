@@ -1,0 +1,194 @@
+{
+  "openapi": "3.0.0",
+  "info":{
+    "title": "トレたび API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/route-names": {
+      "get": {
+        "summary": "路線名を検索",
+        "description": "",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "路線ID"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "路線名"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/timetables": {
+      "get": {
+        "summary": "時刻表一覧を取得",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "number": {
+                        "type": "integer",
+                        "description": "時刻表番号"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "時刻表名"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trains": {
+      "get": {
+        "summary": "列車一覧を取得",
+        "description": "",
+        "parameters": [
+          {
+            "name": "route_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "timetable_number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "駅ID"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "駅名"
+                          }
+                        }
+                      }
+                    },
+                    "trains": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "description": "列車ID"
+                          },
+                          "number": {
+                            "type": "string",
+                            "description": "列車番号"
+                          },
+                          "from": {
+                            "type": "string",
+                            "description": "始発駅"
+                          },
+                          "to": {
+                            "type": "string",
+                            "description": "終着駅"
+                          },
+                          "operate_day": {
+                            "type": "string",
+                            "description": "運転日"
+                          },
+                          "stations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer",
+                                  "description": "駅ID"
+                                },
+                                "arrival_time": {
+                                  "type": "string",
+                                  "description": "着時刻"
+                                },
+                                "departure_time": {
+                                  "type": "string",
+                                  "description": "発時刻"
+                                },
+                                "platform": {
+                                  "type": "string",
+                                  "description": "ホーム"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
