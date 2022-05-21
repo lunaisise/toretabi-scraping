@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+<link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+
+<header>
+  <h1>Get トレたび</h1>
+</header>
+
+<main>
+  <form action="" method="post" id="cond">
+    <h2>Cond</h2>
+    <div>
+      <input type="text" name="RL" id="RL" value="京急本線">
+      <label for="RL">路線</label>
+    </div>
+    <div>
+      <button type="submit">検索</button>
+    </div>
+  </form>
+
+  <form action="" method="post" id="cond2" class="hidden">
+    <h2>Cond2</h2>
+    <div>
+      <ul id="RLs"></ul>
+    </div>
+    <div>
+      <button type="submit">検索</button>
+    </div>
+  </form>
+
+  <form action="" method="post" id="cond3" class="hidden">
+    <h2>Cond3</h2>
+    <div>
+      <ul id="PGs"></ul>
+    </div>
+    <div>
+      <button type="submit">表示</button>
+    </div>
+  </form>
+</main>
+
+<script type="module" src="./js/index.js"></script>
+
+</body>
+</html>
