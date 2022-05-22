@@ -62,8 +62,8 @@ window.addEventListener('DOMContentLoaded', () => {
         json.forEach(item => {
             const clone = template.content.cloneNode(true);
             const id = `timetable-${item.number}`;
-            clone.querySelector('[type="radio"]').id = id;
-            clone.querySelector('[type="radio"]').value = item.number;
+            clone.querySelector('[type="checkbox"]').id = id;
+            clone.querySelector('[type="checkbox"]').value = item.number;
             clone.querySelector('label').setAttribute('for', id);
             clone.querySelector('label').textContent = item.name;
             timetableListElem.appendChild(clone);
@@ -81,17 +81,19 @@ window.addEventListener('DOMContentLoaded', () => {
         loadingDialog.showModal();
 
         const id = document.querySelector('#route-list').value;
-        const number = document.querySelector('[name="timetable"]:checked').value;
-        const countResponse = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}&count=true`);
-        const countJson = await countResponse.json();
-        console.log(countJson);
+        console.log(id);
+        const numbers = [];
+        document.querySelectorAll('#timetable-list [type="checkbox"]:checked').forEach(elem => numbers.push(elem.value));
+        const jsons = await Promise.all(numbers.map(number => fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}&count=true`).then(response => response.json())));
+        console.log(jsons);
 
-        if (!confirm(`列車情報取得まで${countJson.count}秒かかります。\n取得を実施しますか？`)) {
+        const count = jsons.reduce((sum, json) => sum + json.count, 0);
+        if (!confirm(`列車情報取得まで${count}秒かかります。\n取得を実施しますか？`)) {
             loadingDialog.close();
             return;
         }
 
-        progressBar.setAttribute('max', (countJson.count * 10) + 30);
+        progressBar.setAttribute('max', (count * 10) + 30);
 
         let i = 0;
         const interval = setInterval(() => {
@@ -99,18 +101,18 @@ window.addEventListener('DOMContentLoaded', () => {
             i++;
         }, 100);
 
-        const response = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}`);
-        const text = await response.text();
-        clearInterval(interval);
-        console.log(text);
-        console.log(JSON.parse(text));
+        // const response = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}`);
+        // const text = await response.text();
+        // clearInterval(interval);
+        // console.log(text);
+        // console.log(JSON.parse(text));
 
-        loadingDialog.close();
+        // loadingDialog.close();
 
-        sessionStorage.setItem('routeName', document.querySelector('#route-name').value);
-        sessionStorage.setItem('routeId', document.querySelector('#route-list').value);
-        sessionStorage.setItem('trains', text);
-        location.href = 'timetable.html';
+        // sessionStorage.setItem('routeName', document.querySelector('#route-name').value);
+        // sessionStorage.setItem('routeId', document.querySelector('#route-list').value);
+        // sessionStorage.setItem('trains', text);
+        // location.href = 'timetable.html';
     }
 
     document.querySelector('#route-name-form').addEventListener('submit', e => {

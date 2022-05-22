@@ -29,7 +29,7 @@ select:disabled {
     cursor: default;
 }
 
-[type="radio"] {
+[type="checkbox"] {
     cursor: pointer;
 }
 
@@ -45,7 +45,7 @@ select + label {
 }
 
 select + label,
-[type="radio"] + label {
+[type="checkbox"] + label {
     cursor: pointer;
 }
 
