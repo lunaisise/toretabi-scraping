@@ -137,12 +137,20 @@ foreach ($train_ids as $train_id) {
                 continue;
             }
             // var_dump($m);
-            $m2 = filter_var(ltrim($m[2], "0"), FILTER_VALIDATE_INT);
-            $m3 = filter_var(ltrim($m[3], "0"), FILTER_VALIDATE_INT);
+            $arr_time = null;
+            preg_match("/^\d{1,4}$/", $m[2], $m2);
+            if ($m2) {
+                $arr_time = $m2[0];
+            }
+            $dep_time = null;
+            preg_match("/^\d{1,4}$/", $m[3], $m2);
+            if ($m2) {
+                $dep_time = $m2[0];
+            }
             $train_stations[] = array(
                 "id" => $station_name_ids[$m[1]],
-                "arrival_time" => $m2 === false ? null : $m2,
-                "departure_time" => $m3 === false ? null : $m3,
+                "arrival_time" => $arr_time,
+                "departure_time" => $dep_time,
                 "platform" => $m[4] === "<BR>" ? null : $m[4]
             );
         }
