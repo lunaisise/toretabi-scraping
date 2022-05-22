@@ -91,18 +91,19 @@ window.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        progressBar.setAttribute('max', countJson.count + 5);
+        progressBar.setAttribute('max', (countJson.count * 10) + 30);
 
         let i = 0;
         const interval = setInterval(() => {
             progressBar.value = i;
             i++;
-        }, 1000);
+        }, 100);
 
         const response = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}`);
         const text = await response.text();
         clearInterval(interval);
         console.log(text);
+        console.log(JSON.parse(text));
 
         loadingDialog.close();
 

@@ -61,11 +61,28 @@ window.addEventListener('DOMContentLoaded', () => {
         });
         trains.forEach(train => {
             const trainId = train.id;
-            const tds = [];
-            document.querySelectorAll(`tbody > tr > td[data-id="${trainId}"]`).forEach(td => {
-                tds.push(td.textContent.length !== 0);
+            const stops = [];
+            const tds = document.querySelectorAll(`tbody > tr > td[data-id="${trainId}"]`);
+            for (let i = 0; i < tds.length; i++) {
+                if (tds[i].textContent.length !== 0) {
+                    stops.push(i);
+                }
+            }
+            for (let i = 1; i < stops.length; i++) {
+                const lastStop = stops[i - 1];
+                const thisStop = stops[i];
+                for (let j = lastStop + 1; j < thisStop; j++) {
+                    const td = tds[j];
+                    td.dataset.passage = 'true';
+                    td.textContent = 'レ';
+                }
+            }
+            document.querySelectorAll('tbody > tr[data-des="arr"] > td[data-passage="true"]').forEach(td => {
+                td.setAttribute('rowspan', 2);
             });
-            console.log(tds);
+            document.querySelectorAll('tbody > tr[data-des="dep"] > td[data-passage="true"]').forEach(td => {
+                td.remove();
+            });
         });
     }
 
