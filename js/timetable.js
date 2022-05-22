@@ -1,14 +1,27 @@
 window.addEventListener('DOMContentLoaded', () => {
-    const {stations, trains} = (() => {
+    const {routeName, routeId, stations, trains} = (() => {
+        const routeName = sessionStorage.getItem('routeName');
+        const routeId = sessionStorage.getItem('routeId');
         const text = sessionStorage.getItem('trains');
+        if (text === null) {
+            return {
+                routeName,
+                routeId,
+                stations: null,
+                trains: null
+            };
+        }
         const json = JSON.parse(text);
         return {
+            routeName,
+            routeId: Number(routeId),
             stations: json.stations,
             trains: json.trains
         };
     })();
 
     function setStations() {
+        document.querySelector('tbody').textContent = '';
         stations.forEach(station => {
             const arrTr = document.createElement('tr');
             arrTr.dataset.id = station.id;
@@ -32,6 +45,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     function setTrains() {
+        document.querySelectorAll('thead > tr:last-child > th:nth-child(n + 2)').forEach(th => {
+            th.remove();
+        });
         document.querySelector('thead > tr > th:last-child').setAttribute('colspan', trains.length);
         trains.forEach(train => {
             const id = train.id;
@@ -87,7 +103,11 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     (() => {
-        console.log({stations, trains});
+        console.log({routeName, routeId, stations, trains});
+        if ([routeName, routeId, stations, trains].includes(null)) {
+            alert('時刻表を選択してください。');
+            location.href = './';
+        }
         setStations();
         setTrains();
     })();

@@ -107,6 +107,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
         loadingDialog.close();
 
+        sessionStorage.setItem('routeName', document.querySelector('#route-name').value);
+        sessionStorage.setItem('routeId', document.querySelector('#route-list').value);
         sessionStorage.setItem('trains', text);
         location.href = 'timetable.html';
     }
