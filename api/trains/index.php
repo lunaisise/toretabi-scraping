@@ -16,73 +16,102 @@ if (is_null($route_id) || filter_var($route_id, FILTER_VALIDATE_INT) === false) 
     ));
 }
 
-$timetable_number = $http_method->getParam("timetable_number");
-if (is_null($timetable_number) || filter_var($timetable_number, FILTER_VALIDATE_INT) === false) {
+$timetable_number_param = $http_method->getParam("timetable_number");
+if (is_null($timetable_number_param)) {
     echoJson(HTTP_RESPONSE_CODE_BAD_REQUEST, array(
         "message" => "timetable_numberが正しく指定されていません。"
     ));
 }
 
+$timetables = array();
 $train_ids = array();
 $stations = array();
 $station_name_ids = array();
-$i = 0;
-while (true) {
-    $offset = 100 * $i;
-    $url = "https://jikoku.toretabi.jp/cgi-bin/tra.cgi/tra-tt?RL={$route_id}&PG={$timetable_number}&TT=1&DI=100&PO={$offset}";
-    // var_dump($url);
 
-    $response = fetch($url);
-    preg_match("/charset\=(EUC-JP)/", $response->blob(), $m);
-    $charset = mb_detect_encoding($response->blob());
-    if (count($m) === 2) {
-        $charset = $m[1];
-    }
-    $body = mb_convert_encoding($response->blob(), UTF_8, $charset);
-    // var_dump($body);
-
-    preg_match_all("/TR\=(\d+)\s/", $body, $m);
-    foreach ($m[1] as $id) {
-        $train_ids[] = $id;
+$timetable_numbers = explode(',', $timetable_number_param);
+foreach ($timetable_numbers as $timetable_number) {
+    if (filter_var($timetable_number, FILTER_VALIDATE_INT) === false) {
+        continue;
     }
 
-    if ($i === 0) {
-        $strings = explode("</SELECT>", $body);
-        foreach ($strings as $string) {
-            preg_match("/\<SELECT\sname\=\'EX\'[\s\S]+/", $string, $m);
-            if (!$m) {
-                continue;
-            }
+    $timetable_stations = array();
+    $timetable_trains_ids = array();
 
-            $options = explode("</OPTION>", $m[0]);
-            foreach ($options as $option) {
-                preg_match("/value\=\'(\d+)\'\>([\s\S]+)/", $option, $m);
+    $i = 0;
+    while (true) {
+        $offset = 100 * $i;
+        $url = "https://jikoku.toretabi.jp/cgi-bin/tra.cgi/tra-tt?RL={$route_id}&PG={$timetable_number}&TT=1&DI=100&PO={$offset}";
+        // var_dump($url);
+
+        $response = fetch($url);
+        preg_match("/charset\=(EUC-JP)/", $response->blob(), $m);
+        $charset = mb_detect_encoding($response->blob());
+        if (count($m) === 2) {
+            $charset = $m[1];
+        }
+        $body = mb_convert_encoding($response->blob(), UTF_8, $charset);
+        // var_dump($body);
+
+        preg_match_all("/TR\=(\d+)\s/", $body, $m);
+        foreach ($m[1] as $id) {
+            $timetable_trains_ids[] = $id;
+            $train_ids[] = $id;
+        }
+
+        if ($i === 0) {
+            $strings = explode("</SELECT>", $body);
+            foreach ($strings as $string) {
+                preg_match("/\<SELECT\sname\=\'EX\'[\s\S]+/", $string, $m);
                 if (!$m) {
                     continue;
                 }
-                $stations[] = array(
-                    "id" => (int)$m[1],
-                    "name" => $m[2]
-                );
-                $station_name_ids[$m[2]] = (int)$m[1];
-            }
-            break;
-        }
-    }
 
-    preg_match("/\'\>\<IMG\ssrc\=\'\/img\/ttnext\.gif/", $body, $m);
-    if ($m) {
-        $i++;
-        continue;
+                $options = explode("</OPTION>", $m[0]);
+                foreach ($options as $option) {
+                    preg_match("/value\=\'(\d+)\'\>([\s\S]+)/", $option, $m);
+                    if (!$m) {
+                        continue;
+                    }
+                    $station_id = (int)$m[1];
+                    $station_name = $m[2];
+                    $station = array(
+                        "id" => $station_id,
+                        "name" => $station_name
+                    );
+                    $timetable_stations[] = $station;
+                    $stations[] = $station;
+                    $station_name_ids[$station_name] = $station_id;
+                }
+                break;
+            }
+        }
+
+        preg_match("/\'\>\<IMG\ssrc\=\'\/img\/ttnext\.gif/", $body, $m);
+        if ($m) {
+            $i++;
+            continue;
+        }
+        break;
     }
-    break;
+    $timetable_trains_ids = array_unique($timetable_trains_ids);
+
+    $timetables[$timetable_number] = array(
+        "stations" => $timetable_stations,
+        "trains" => array()
+    );
+    foreach ($timetable_trains_ids as $train_id) {
+        $timetables[$timetable_number]["trains"][] = array(
+            "id" => $train_id
+        );
+    }
 }
 $train_ids = array_unique($train_ids);
 
 $count = $http_method->getParam("count");
 if ($count) {
     echoJson(HTTP_RESPONSE_CODE_OK, array(
-        "count" => count($train_ids)
+        "count" => count($train_ids),
+        "stations" => $stations
     ));
 }
 
@@ -168,7 +197,15 @@ foreach ($train_ids as $train_id) {
     // break;
 }
 
-echoJson(HTTP_RESPONSE_CODE_OK, array(
-    "stations" => $stations,
-    "trains" => $trains
-));
+$train_id_key = array();
+foreach ($trains as $key => $train) {
+    $train_id_key["{$train['id']}"] = $key;
+}
+
+foreach ($timetables as $timetable_number => $timetable) {
+    foreach ($timetable["trains"] as $key => $train) {
+        $timetables[$timetable_number]["trains"][$key] = $trains[$train_id_key[$train["id"]]];
+    }
+}
+
+echoJson(HTTP_RESPONSE_CODE_OK, $timetables);

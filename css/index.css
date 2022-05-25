@@ -54,7 +54,55 @@ select:disabled + label {
 }
 
 [type="submit"] {
+    cursor: pointer;
     margin-top: 1rem;
+}
+
+#station-dialog {
+    background-color: rgba(255, 255, 255, .5);
+    border: 1px solid #fff;
+    border-radius: 1rem 0 0 1rem;
+    padding: 0;
+}
+
+#station-dialog::backdrop {
+    backdrop-filter: blur(.5rem);
+}
+
+#station-dialog > div {
+    align-items: center;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+#station-dialog > div > h2 {
+    margin: 0;
+}
+
+#to-timetable > [type="submit"] {
+    margin: 0;
+}
+
+#station-dialog > ul {
+    list-style: none;
+    margin: 1rem;
+    padding: 0;
+}
+
+#station-dialog > ul > li {
+    align-items: center;
+    display: flex;
+}
+
+#station-dialog label {
+    border-left: 1px solid #fff;
+    flex-grow: 1;
+    padding-left: .5rem;
 }
 
 #loading-dialog {

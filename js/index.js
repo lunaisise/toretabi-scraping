@@ -1,4 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
+    const stationDialog = document.querySelector('#station-dialog');
     const loadingDialog = document.querySelector('#loading-dialog');
     const progressBar = document.querySelector('#progress');
 
@@ -73,12 +74,54 @@ window.addEventListener('DOMContentLoaded', () => {
         loadingDialog.close();
     }
 
-    async function getTrins() {
+    async function getTrains(id, numbers) {
+        let i = 0;
+        const interval = setInterval(() => {
+            progressBar.value = i;
+            i++;
+        }, 100);
+
+        const response = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${numbers.join(',')}`);
+        const text = await response.text();
+        clearInterval(interval);
+        console.log(text);
+        return text;
+    }
+
+    /**
+     * 
+     * @param {Array} jsons 
+     */
+    async function showStations(jsons) {
+        console.log(jsons);
+        document.querySelector('#station-dialog > ul').textContent = '';
+        let marginLeft = 0.5;
+        const template = document.querySelector('#station-template');
+        jsons.forEach(json => {
+            json.stations.forEach(station => {
+                const id = `station-${station.id}`;
+                console.log(document.querySelector(`#${id}`));
+                if (document.querySelector(`#${id}`) !== null) {
+                    return;
+                }
+                const name = station.name;
+                const clone = template.content.cloneNode(true);
+                clone.querySelector('[type="checkbox"]').id = id;
+                const label = clone.querySelector('label');
+                label.setAttribute('for', id);
+                label.textContent = name;
+                label.style.marginLeft = `${marginLeft}rem`;
+                document.querySelector('#station-dialog > ul').appendChild(clone);
+            });
+            marginLeft += Math.max(...(json.stations.map(station => station.name.length)));
+        });
+        stationDialog.showModal();
+    }
+
+    async function getTimetables() {
         document.querySelectorAll('main > section:nth-child(n + 4)').forEach(elem => {
             elem.classList.add(hidden);
         });
-
-        loadingDialog.showModal();
 
         const id = document.querySelector('#route-list').value;
         console.log(id);
@@ -93,26 +136,19 @@ window.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        progressBar.setAttribute('max', (count * 10) + 30);
+        // progressBar.setAttribute('max', (count * 10) + 30);
 
-        let i = 0;
-        const interval = setInterval(() => {
-            progressBar.value = i;
-            i++;
-        }, 100);
+        const submit = document.querySelector('#to-timetable > [type="submit"]');
+        submit['disabled'] = true;
+        const [text] = await Promise.all([getTrains(id, numbers), showStations(jsons)]);
 
-        // const response = await fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}`);
-        // const text = await response.text();
-        // clearInterval(interval);
-        // console.log(text);
-        // console.log(JSON.parse(text));
+        console.log(JSON.parse(text));
 
-        // loadingDialog.close();
+        sessionStorage.setItem('routeName', document.querySelector('#route-name').value);
+        sessionStorage.setItem('routeId', document.querySelector('#route-list').value);
+        sessionStorage.setItem('trains', text);
 
-        // sessionStorage.setItem('routeName', document.querySelector('#route-name').value);
-        // sessionStorage.setItem('routeId', document.querySelector('#route-list').value);
-        // sessionStorage.setItem('trains', text);
-        // location.href = 'timetable.html';
+        submit['disabled'] = false;
     }
 
     document.querySelector('#route-name-form').addEventListener('submit', e => {
@@ -127,6 +163,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#timetable-list-form').addEventListener('submit', e => {
         e.preventDefault();
-        getTrins();
+        getTimetables();
+    });
+
+    document.querySelector('#to-timetable').addEventListener('submit', () => {
+
     });
 });

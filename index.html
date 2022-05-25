@@ -44,9 +44,15 @@
   </section>
 </main>
 
-<template id="timetable-list-template">
-  <li><input type="checkbox" id=""><label for=""></label></li>
-</template>
+<dialog id="station-dialog">
+  <div>
+    <h2>駅順</h2>
+    <form action="timetable.html" method="get" id="to-timetable">
+      <button type="submit">時刻表を開く</button>
+    </form>
+  </div>
+  <ul></ul>
+</dialog>
 
 <dialog id="loading-dialog">
   <div id="spinner"></div>
@@ -54,6 +60,14 @@
     <progress id="progress"></progress>
   </div>
 </dialog>
+
+<template id="timetable-list-template">
+  <li><input type="checkbox" id=""><label for=""></label></li>
+</template>
+
+<template id="station-template">
+  <li><input type="checkbox" id="" checked><label for=""></label></li>
+</template>
 
 <script src="./js/index.js"></script>
 
