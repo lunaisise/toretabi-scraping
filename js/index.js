@@ -94,26 +94,39 @@ window.addEventListener('DOMContentLoaded', () => {
      */
     async function showStations(jsons) {
         console.log(jsons);
-        document.querySelector('#station-dialog > ul').textContent = '';
-        let marginLeft = 0.5;
+        document.querySelector('#timetable-names').textContent = '';
+        document.querySelector('#stations').textContent = '';
+        let i = 1;
+        let left = 1.5;
         const template = document.querySelector('#station-template');
         jsons.forEach(json => {
+            const li = document.createElement('li');
+            li.textContent = document.querySelector(`[for="timetable-${json.number}"]`).textContent;
+            li.style.marginLeft = `${left}rem`;
+            document.querySelector('#timetable-names').appendChild(li);
             json.stations.forEach(station => {
                 const id = `station-${station.id}`;
-                console.log(document.querySelector(`#${id}`));
+                const name = station.name;
+                const span = document.createElement('span');
+                span.textContent = name;
+                // console.log(document.querySelector(`#${id}`));
                 if (document.querySelector(`#${id}`) !== null) {
+                    document.querySelector(`#${id} + label`).appendChild(span);
                     return;
                 }
-                const name = station.name;
                 const clone = template.content.cloneNode(true);
                 clone.querySelector('[type="checkbox"]').id = id;
                 const label = clone.querySelector('label');
                 label.setAttribute('for', id);
-                label.textContent = name;
-                label.style.marginLeft = `${marginLeft}rem`;
-                document.querySelector('#station-dialog > ul').appendChild(clone);
+                label.style.marginLeft = `${left}rem`;
+                label.appendChild(span);
+                document.querySelector('#stations').appendChild(clone);
             });
-            marginLeft += Math.max(...(json.stations.map(station => station.name.length)));
+            left += Math.max(...(json.stations.map(station => station.name.length)));
+            document.querySelectorAll(`#stations span:nth-child(${i})`).forEach(span => {
+                span.style.width = `${left - 1.5}rem`;
+            });
+            i++;
         });
         stationDialog.showModal();
     }
@@ -129,6 +142,9 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#timetable-list [type="checkbox"]:checked').forEach(elem => numbers.push(elem.value));
         const jsons = await Promise.all(numbers.map(number => fetch(`http://localhost/toretabi-scraping/api/trains/?route_id=${id}&timetable_number=${number}&count=true`).then(response => response.json())));
         console.log(jsons);
+        Object.keys(jsons).forEach(i => {
+            jsons[i].number = numbers[i];
+        });
 
         const count = jsons.reduce((sum, json) => sum + json.count, 0);
         if (!confirm(`列車情報取得まで${count}秒かかります。\n取得を実施しますか？`)) {
@@ -164,6 +180,10 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#timetable-list-form').addEventListener('submit', e => {
         e.preventDefault();
         getTimetables();
+    });
+
+    document.querySelector('#cancel').addEventListener('click', () => {
+        stationDialog.close();
     });
 
     document.querySelector('#to-timetable').addEventListener('submit', () => {

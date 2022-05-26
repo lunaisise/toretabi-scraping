@@ -53,9 +53,13 @@ select:disabled + label {
     cursor: default;
 }
 
-[type="submit"] {
+button {
     cursor: pointer;
     margin-top: 1rem;
+}
+
+button:disabled {
+    cursor: default;
 }
 
 #station-dialog {
@@ -84,7 +88,7 @@ select:disabled + label {
     margin: 0;
 }
 
-#to-timetable > [type="submit"] {
+#to-timetable > button {
     margin: 0;
 }
 
@@ -97,12 +101,28 @@ select:disabled + label {
 #station-dialog > ul > li {
     align-items: center;
     display: flex;
+    position: relative;
+}
+
+#timetable-names > li {
+    border-left: 1px solid #fff;
+    overflow-x: hidden;
+    padding-left: .5rem;
+}
+
+#station-dialog [type="checkbox"] {
+    position: absolute;
 }
 
 #station-dialog label {
     border-left: 1px solid #fff;
+    display: flex;
     flex-grow: 1;
     padding-left: .5rem;
+}
+
+#stations span:nth-child(n + 2) {
+    color: #ccc;
 }
 
 #loading-dialog {
