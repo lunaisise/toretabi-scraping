@@ -1,0 +1,20 @@
+.mi {
+    direction: ltr;
+    display: inline-block;
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: normal;
+    letter-spacing: normal;
+    line-height: 1;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+}
+
+.mi.mi-drag_handle::before {
+    content: 'drag_handle';
+}
+
+.mi.mi-swap_vert::before {
+    content: 'swap_vert';
+}

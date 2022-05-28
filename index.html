@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Get トレたび</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="./css/material-icons.css">
 <link rel="stylesheet" href="./css/index.css">
 </head>
 <body>
@@ -68,9 +70,10 @@
 </template>
 
 <template id="station-template">
-  <li><input type="checkbox" id="" checked><label for=""></label></li>
+  <li><i class="mi mi-drag_handle"></i><input type="checkbox" id="" data-station="" checked><label for=""></label></li>
 </template>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <script src="./js/index.js"></script>
 
 </body>

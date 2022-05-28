@@ -5,6 +5,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const hidden = 'hidden';
 
+    const allStations = [];
+
     async function getRouteName() {
         document.querySelectorAll('main > section:nth-child(n + 2)').forEach(elem => {
             elem.classList.add(hidden);
@@ -96,14 +98,18 @@ window.addEventListener('DOMContentLoaded', () => {
         console.log(jsons);
         document.querySelector('#timetable-names').textContent = '';
         document.querySelector('#stations').textContent = '';
+        allStations.length = 0;
         let i = 1;
         let left = 1.5;
         const template = document.querySelector('#station-template');
         jsons.forEach(json => {
             const li = document.createElement('li');
-            li.textContent = document.querySelector(`[for="timetable-${json.number}"]`).textContent;
-            li.style.marginLeft = `${left}rem`;
+            li.style.marginLeft = `${left + 1}rem`;
+            const span = document.createElement('span');
+            span.textContent = document.querySelector(`[for="timetable-${json.number}"]`).textContent;
+            li.appendChild(span);
             document.querySelector('#timetable-names').appendChild(li);
+
             json.stations.forEach(station => {
                 const id = `station-${station.id}`;
                 const name = station.name;
@@ -114,8 +120,11 @@ window.addEventListener('DOMContentLoaded', () => {
                     document.querySelector(`#${id} + label`).appendChild(span);
                     return;
                 }
+                allStations.push(station);
                 const clone = template.content.cloneNode(true);
-                clone.querySelector('[type="checkbox"]').id = id;
+                const checkbox = clone.querySelector('[type="checkbox"]');
+                checkbox.id = id;
+                checkbox.dataset.station = station.id;
                 const label = clone.querySelector('label');
                 label.setAttribute('for', id);
                 label.style.marginLeft = `${left}rem`;
@@ -130,6 +139,11 @@ window.addEventListener('DOMContentLoaded', () => {
         });
         stationDialog.showModal();
     }
+
+    Sortable.create(document.querySelector('#stations'), {
+        animation: 150,
+        handle: '.mi-drag_handle'
+    });
 
     async function getTimetables() {
         document.querySelectorAll('main > section:nth-child(n + 4)').forEach(elem => {
@@ -186,7 +200,13 @@ window.addEventListener('DOMContentLoaded', () => {
         stationDialog.close();
     });
 
-    document.querySelector('#to-timetable').addEventListener('submit', () => {
-
+    document.querySelector('#to-timetable').addEventListener('submit', e => {
+        // e.preventDefault();
+        const stations = [];
+        document.querySelectorAll('#stations [type="checkbox"]:checked').forEach(checkbox => {
+            const stationId = Number(checkbox.dataset.station);
+            stations.push(allStations.find(station => station.id === stationId));
+        });
+        sessionStorage.setItem('stations', JSON.stringify(stations));
     });
 });

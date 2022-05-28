@@ -110,7 +110,16 @@ button:disabled {
     padding-left: .5rem;
 }
 
+#timetable-names button {
+    margin: 0;
+}
+
+.mi-drag_handle {
+    cursor: ns-resize;
+}
+
 #station-dialog [type="checkbox"] {
+    left: 1rem;
     position: absolute;
 }
 
