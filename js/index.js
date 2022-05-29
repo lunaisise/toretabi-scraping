@@ -1,7 +1,8 @@
 window.addEventListener('DOMContentLoaded', () => {
-    const stationDialog = document.querySelector('#station-dialog');
-    const loadingDialog = document.querySelector('#loading-dialog');
-    const progressBar = document.querySelector('#progress');
+    const stationDialog = document.getElementById('station-dialog');
+    const loadingDialog = document.getElementById('loading-dialog');
+    const progressBar = document.getElementById('progress');
+    const stationProgressBar = document.getElementById('station-progress');
 
     const hidden = 'hidden';
 
@@ -12,7 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
             elem.classList.add(hidden);
         });
 
-        const name = document.querySelector('#route-name').value;
+        const name = document.getElementById('route-name').value;
         if (name.length === 0) {
             alert('路線名を入力してください。');
             return;
@@ -30,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         console.log(json);
 
-        const routeListElem = document.querySelector('#route-list');
+        const routeListElem = document.getElementById('route-list');
         routeListElem.textContent = '';
         json.forEach(item => {
             const optionElem = document.createElement('option');
@@ -44,7 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
             routeListElem['disabled'] = true;
             getTimetableList();
         }
-        document.querySelector('#route-list-section').classList.remove(hidden);
+        document.getElementById('route-list-section').classList.remove(hidden);
     }
 
     async function getTimetableList() {
@@ -54,14 +55,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
         loadingDialog.showModal();
 
-        const id = document.querySelector('#route-list').value;
+        const id = document.getElementById('route-list').value;
         const response = await fetch(`./api/timetables?id=${id}`);
         const json = await response.json();
         console.log(json);
 
-        const timetableListElem = document.querySelector('#timetable-list');
+        const timetableListElem = document.getElementById('timetable-list');
         timetableListElem.textContent = '';
-        const template = document.querySelector('#timetable-list-template');
+        const template = document.getElementById('timetable-list-template');
         json.forEach(item => {
             const clone = template.content.cloneNode(true);
             const id = `timetable-${item.number}`;
@@ -71,7 +72,7 @@ window.addEventListener('DOMContentLoaded', () => {
             clone.querySelector('label').textContent = item.name;
             timetableListElem.appendChild(clone);
         });
-        document.querySelector('#timetable-list-section').classList.remove(hidden);
+        document.getElementById('timetable-list-section').classList.remove(hidden);
 
         loadingDialog.close();
     }
@@ -79,7 +80,7 @@ window.addEventListener('DOMContentLoaded', () => {
     async function getTrains(id, numbers) {
         let i = 0;
         const interval = setInterval(() => {
-            progressBar.value = i;
+            stationProgressBar.value = i;
             i++;
         }, 100);
 
@@ -96,12 +97,12 @@ window.addEventListener('DOMContentLoaded', () => {
      */
     async function showStations(jsons) {
         console.log(jsons);
-        document.querySelector('#timetable-names').textContent = '';
-        document.querySelector('#stations').textContent = '';
+        document.getElementById('timetable-names').textContent = '';
+        document.getElementById('stations').textContent = '';
         allStations.length = 0;
         let i = 1;
         let left = 1.5;
-        const template = document.querySelector('#station-template');
+        const template = document.getElementById('station-template');
         jsons.forEach(json => {
             const li = document.createElement('li');
             li.style.marginLeft = `${left + 1}rem`;
@@ -115,8 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 const name = station.name;
                 const span = document.createElement('span');
                 span.textContent = name;
-                // console.log(document.querySelector(`#${id}`));
-                if (document.querySelector(`#${id}`) !== null) {
+                if (document.getElementById(`${id}`) !== null) {
                     document.querySelector(`#${id} + label`).appendChild(span);
                     return;
                 }
@@ -129,7 +129,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 label.setAttribute('for', id);
                 label.style.marginLeft = `${left}rem`;
                 label.appendChild(span);
-                document.querySelector('#stations').appendChild(clone);
+                document.getElementById('stations').appendChild(clone);
             });
             left += Math.max(...(json.stations.map(station => station.name.length)));
             document.querySelectorAll(`#stations span:nth-child(${i})`).forEach(span => {
@@ -140,7 +140,7 @@ window.addEventListener('DOMContentLoaded', () => {
         stationDialog.showModal();
     }
 
-    Sortable.create(document.querySelector('#stations'), {
+    Sortable.create(document.getElementById('stations'), {
         animation: 150,
         handle: '.mi-drag_handle'
     });
@@ -150,7 +150,7 @@ window.addEventListener('DOMContentLoaded', () => {
             elem.classList.add(hidden);
         });
 
-        const id = document.querySelector('#route-list').value;
+        const id = document.getElementById('route-list').value;
         console.log(id);
         const numbers = [];
         document.querySelectorAll('#timetable-list [type="checkbox"]:checked').forEach(elem => numbers.push(elem.value));
@@ -166,41 +166,43 @@ window.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // progressBar.setAttribute('max', (count * 10) + 30);
+        stationProgressBar.setAttribute('max', (count * 10) + 30);
+        stationProgressBar.classList.remove('hidden');
 
         const submit = document.querySelector('#to-timetable > [type="submit"]');
         submit['disabled'] = true;
         const [text] = await Promise.all([getTrains(id, numbers), showStations(jsons)]);
 
         console.log(JSON.parse(text));
+        stationProgressBar.classList.add('hidden');
 
-        sessionStorage.setItem('routeName', document.querySelector('#route-name').value);
-        sessionStorage.setItem('routeId', document.querySelector('#route-list').value);
+        sessionStorage.setItem('routeName', document.getElementById('route-name').value);
+        sessionStorage.setItem('routeId', document.getElementById('route-list').value);
         sessionStorage.setItem('trains', text);
 
         submit['disabled'] = false;
     }
 
-    document.querySelector('#route-name-form').addEventListener('submit', e => {
+    document.getElementById('route-name-form').addEventListener('submit', e => {
         e.preventDefault();
         getRouteName();
     });
 
-    document.querySelector('#route-list-form').addEventListener('submit', e => {
+    document.getElementById('route-list-form').addEventListener('submit', e => {
         e.preventDefault();
         getTimetableList();
     });
 
-    document.querySelector('#timetable-list-form').addEventListener('submit', e => {
+    document.getElementById('timetable-list-form').addEventListener('submit', e => {
         e.preventDefault();
         getTimetables();
     });
 
-    document.querySelector('#cancel').addEventListener('click', () => {
+    document.getElementById('cancel').addEventListener('click', () => {
         stationDialog.close();
     });
 
-    document.querySelector('#to-timetable').addEventListener('submit', e => {
+    document.getElementById('to-timetable').addEventListener('submit', e => {
         // e.preventDefault();
         const stations = [];
         document.querySelectorAll('#stations [type="checkbox"]:checked').forEach(checkbox => {

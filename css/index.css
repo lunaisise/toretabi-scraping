@@ -88,6 +88,13 @@ button:disabled {
     margin: 0;
 }
 
+#station-progress {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+}
+
 #to-timetable > button {
     margin: 0;
 }
