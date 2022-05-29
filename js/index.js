@@ -111,7 +111,10 @@ window.addEventListener('DOMContentLoaded', () => {
             li.style.marginLeft = `${left + 1}rem`;
             const checkbox = clone.querySelector('[type="checkbox"]');
             checkbox.id = id;
-            checkbox.dataset.id = json.number;
+            checkbox.dataset.timetable = json.number;
+            checkbox.addEventListener('change', () => {
+                checkbox.dataset.direction = checkbox['checked'] ? 'up' : 'down';
+            });
             const label = clone.querySelector('label');
             label.setAttribute('for', id);
             label.textContent = document.querySelector(`[for="timetable-${json.number}"]`).textContent;
@@ -216,5 +219,18 @@ window.addEventListener('DOMContentLoaded', () => {
             stations.push(allStations.find(station => station.id === stationId));
         });
         sessionStorage.setItem('stations', JSON.stringify(stations));
+
+        const trains = JSON.parse(sessionStorage.getItem('trains'));
+        console.log(trains);
+        const result = {
+            'down': {},
+            'up': {}
+        };
+        document.querySelectorAll('#timetable-names [type="checkbox"]').forEach(checkbox => {
+            const timetableId = checkbox.dataset.timetable;
+            const direction = checkbox.dataset.direction;
+            result[direction][timetableId] = trains[timetableId];
+        });
+        sessionStorage.setItem('trains', JSON.stringify(result));
     });
 });

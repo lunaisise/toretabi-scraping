@@ -3,6 +3,38 @@
     color: #333;
 }
 
+main > div {
+    display: flex;
+    margin: 1rem 0;
+}
+
+main > div > label {
+    border: 1px solid #ccc;
+    cursor: pointer;
+    padding: .5rem;
+}
+
+main > div > label.checked {
+    background-color: #eee;
+    cursor: default;
+}
+
+main > div > label:first-child {
+    border-radius: .5rem 0 0 .5rem;
+}
+
+main > div > label:last-child {
+    border-radius: 0 .5rem .5rem 0;
+}
+
+[type="radio"] {
+    display: none;
+}
+
+[type="radio"]:not(:checked) + table {
+    display: none;
+}
+
 table {
     border-collapse: collapse;
 }

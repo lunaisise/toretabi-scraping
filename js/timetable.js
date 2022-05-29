@@ -23,97 +23,98 @@ window.addEventListener('DOMContentLoaded', () => {
     })();
 
     function setStations() {
-        document.querySelector('tbody').textContent = '';
+        document.querySelectorAll('tbody').forEach(tbody => {
+            tbody.textContent = '';
+        });
+        const template = document.getElementById('station-template');
         stations.forEach(station => {
-            const arrTr = document.createElement('tr');
-            arrTr.dataset.id = station.id;
-            arrTr.dataset.des = 'arr';
-            const nameTh = document.createElement('th');
-            nameTh.setAttribute('rowspan', 2);
-            nameTh.textContent = station.name;
-            const arrTh = document.createElement('th');
-            arrTh.textContent = '着';
-            arrTr.appendChild(nameTh);
-            arrTr.appendChild(arrTh);
-            document.querySelector('tbody').appendChild(arrTr);
-            const depTr = document.createElement('tr');
-            depTr.dataset.id = station.id;
-            depTr.dataset.des = 'dep';
-            const depTh = document.createElement('th');
-            depTh.textContent = '発';
-            depTr.appendChild(depTh);
-            document.querySelector('tbody').appendChild(depTr);
+            const clone = template.content.cloneNode(true);
+            clone.querySelectorAll('tr').forEach(tr => {
+                tr.dataset.id = station.id;
+            });
+            clone.querySelector('[rowspan="2"]').textContent = station.name;
+            document.querySelector('#down-table > tbody').appendChild(clone);
+        });
+        stations.reverse().forEach(station => {
+            const clone = template.content.cloneNode(true);
+            clone.querySelectorAll('tr').forEach(tr => {
+                tr.dataset.id = station.id;
+            });
+            clone.querySelector('[rowspan="2"]').textContent = station.name;
+            document.querySelector('#up-table > tbody').appendChild(clone);
         });
     }
 
     function setTrains() {
-        console.log(trains);
+        // console.log(trains);
         document.querySelectorAll('thead > tr:last-child > th:nth-child(n + 2)').forEach(th => {
             th.remove();
         });
-        let trainCount = 0;
-        Object.keys(trains).forEach(timetableNumber => {
-            trains[timetableNumber].trains.forEach(train => {
-                const id = train.id;
-                const th = document.createElement('th');
-                th.dataset.id = id;
-                th.textContent = train.number;
-                document.querySelector('thead > tr:last-child').appendChild(th);
-                document.querySelectorAll('tbody > tr').forEach(tr => {
-                    const td = document.createElement('td');
-                    td.dataset.id = id;
-                    tr.appendChild(td);
+        let directionCounts = {
+            down: 0,
+            up: 0
+        };
+        Object.keys(trains).forEach(direction => {
+            Object.keys(trains[direction]).forEach(timetableNumber => {
+                trains[direction][timetableNumber].trains.forEach(train => {
+                    const trainId = train.id;
+                    const th = document.createElement('th');
+                    th.dataset.id = trainId;
+                    th.textContent = train.number;
+                    document.querySelector(`#${direction}-table > thead > tr:last-child`).appendChild(th);
+                    document.querySelectorAll(`#${direction}-table > tbody > tr`).forEach(tr => {
+                        const td = document.createElement('td');
+                        td.dataset.id = trainId;
+                        tr.appendChild(td);
+                    });
+                    const trainStationIds = [];
+                    train.stations.forEach(station => {
+                        const stationId = station.id;
+                        trainStationIds.push(stationId);
+                        const arrTd = document.querySelector(`tr[data-id="${stationId}"][data-des="arr"] > td[data-id="${trainId}"]`) ?? null;
+                        if (arrTd !== null && station.arrival_time !== null) {
+                            arrTd.textContent = `${station.arrival_time}`.padStart(4, '0').match(/.{2}/g).join(':');
+                        }
+                        const depTd = document.querySelector(`tr[data-id="${stationId}"][data-des="dep"] > td[data-id="${trainId}"]`) ?? null;
+                        if (depTd !== null && station.departure_time !== null) {
+                            depTd.textContent = `${station.departure_time}`.padStart(4, '0').match(/.{2}/g).join(':');
+                        }
+                    });
+                    let isTrainStarted = false;
+                    stations.forEach(station => {
+                        if (trainStationIds.includes(station.id)) {
+                            isTrainStarted = true;
+                        }
+                        if (!isTrainStarted) {
+                            return;
+                        }
+                        const td = document.querySelector(`tr[data-id="${station.id}"][data-des="dep"] > td[data-id="${trainId}"]`);
+                        if (td.textContent.length === 0) {
+                            td.dataset.started = 'true';
+                        }
+                    });
+                    let isTrainEnded = true;
+                    stations.reverse().forEach(station => {
+                        if (trainStationIds.includes(station.id)) {
+                            isTrainEnded = false;
+                        }
+                        if (isTrainEnded) {
+                            return;
+                        }
+                        if (document.querySelector(`tr[data-id="${station.id}"][data-des="arr"] > td[data-id="${trainId}"]`).textContent.length !== 0) {
+                            return;
+                        }
+                        const td = document.querySelector(`tr[data-id="${station.id}"][data-des="dep"] > td[data-id="${trainId}"]`);
+                        if (td.textContent.length === 0) {
+                            td.dataset.ended = 'false';
+                        }
+                    });
+                    directionCounts[direction]++;
                 });
-                trainCount++;
             });
         });
-        document.querySelector('thead > tr > th:last-child').setAttribute('colspan', trainCount);
-        Object.keys(trains).forEach(timetableNumber => {
-            trains[timetableNumber].trains.forEach(train => {
-                const trainId = train.id;
-                const trainStationId = [];
-                train.stations.forEach(station => {
-                    const stationId = station.id;
-                    trainStationId.push(stationId);
-                    const arrTd = document.querySelector(`tr[data-id="${stationId}"][data-des="arr"] > td[data-id="${trainId}"]`) ?? null;
-                    if (arrTd !== null && station.arrival_time !== null) {
-                        arrTd.textContent = `${station.arrival_time}`.padStart(4, '0').match(/.{2}/g).join(':');
-                    }
-                    const depTd = document.querySelector(`tr[data-id="${stationId}"][data-des="dep"] > td[data-id="${trainId}"]`) ?? null;
-                    if (depTd !== null && station.departure_time !== null) {
-                        depTd.textContent = `${station.departure_time}`.padStart(4, '0').match(/.{2}/g).join(':');
-                    }
-                });
-                let isTrainStarted = false;
-                stations.forEach(station => {
-                    if (trainStationId.includes(station.id)) {
-                        isTrainStarted = true;
-                    }
-                    if (!isTrainStarted) {
-                        return;
-                    }
-                    const td = document.querySelector(`tr[data-id="${station.id}"][data-des="dep"] > td[data-id="${trainId}"]`);
-                    if (td.textContent.length === 0) {
-                        td.dataset.started = 'true';
-                    }
-                });
-                let isTrainEnded = true;
-                stations.reverse().forEach(station => {
-                    if (trainStationId.includes(station.id)) {
-                        isTrainEnded = false;
-                    }
-                    if (isTrainEnded) {
-                        return;
-                    }
-                    if (document.querySelector(`tr[data-id="${station.id}"][data-des="arr"] > td[data-id="${trainId}"]`).textContent.length !== 0) {
-                        return;
-                    }
-                    const td = document.querySelector(`tr[data-id="${station.id}"][data-des="dep"] > td[data-id="${trainId}"]`);
-                    if (td.textContent.length === 0) {
-                        td.dataset.ended = 'false';
-                    }
-                });
-            });
+        Object.keys(directionCounts).forEach(direction => {
+            document.querySelector(`#${direction}-table > thead > tr > th:last-child`).setAttribute('colspan', directionCounts[direction]);
         });
         document.querySelectorAll('tr[data-des="dep"]').forEach(tr => {
             const stationId = tr.dataset.id;
@@ -136,4 +137,14 @@ window.addEventListener('DOMContentLoaded', () => {
         setStations();
         setTrains();
     })();
+
+    document.querySelectorAll('[name="direction"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const id = document.querySelector('[name="direction"]:checked').id;
+            document.querySelectorAll('main > div > label').forEach(label => {
+                label.classList.remove('checked');
+            });
+            document.querySelector(`[for="${id}"]`).classList.add('checked');
+        });
+    });
 });

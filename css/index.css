@@ -122,23 +122,23 @@ button:disabled {
 }
 
 #timetable-names [type="checkbox"]:checked + label::before {
-    content: '(下り) ';
+    content: '(上り) ';
 }
 
 #timetable-names [type="checkbox"]:not(:checked) + label::before {
-    content: '(上り) ';
+    content: '(下り) ';
 }
 
 .mi-drag_handle {
     cursor: ns-resize;
 }
 
-#station-dialog [type="checkbox"] {
+#stations [type="checkbox"] {
     left: 1rem;
     position: absolute;
 }
 
-#station-dialog label {
+#stations label {
     border-left: 1px solid #fff;
     display: flex;
     flex-grow: 1;

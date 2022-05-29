@@ -14,10 +14,29 @@
 </header>
 
 <main>
-  <table>
+  <div>
+    <label for="down" class="checked">下り</label>
+    <label for="up">上り</label>
+  </div>
+  <input type="radio" name="direction" id="down" checked>
+  <table id="down-table">
     <thead>
       <tr>
-        <th rowspan="2">駅名</th>
+        <th rowspan="2">駅名 (下り)</th>
+        <th>着</th>
+        <th>列車</th>
+      </tr>
+      <tr>
+        <th>発</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <input type="radio" name="direction" id="up">
+  <table id="up-table">
+    <thead>
+      <tr>
+        <th rowspan="2">駅名 (上り)</th>
         <th>着</th>
         <th>列車</th>
       </tr>
@@ -28,6 +47,16 @@
     <tbody></tbody>
   </table>
 </main>
+
+<template id="station-template">
+  <tr data-id="" data-des="arr">
+    <th rowspan="2"></th>
+    <th>着</th>
+  </tr>
+  <tr data-id="" data-des="dep">
+    <th>発</th>
+  </tr>
+</template>
 
 <script src="./js/timetable.js"></script>
 
