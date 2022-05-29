@@ -102,14 +102,20 @@ window.addEventListener('DOMContentLoaded', () => {
         allStations.length = 0;
         let i = 1;
         let left = 1.5;
+        const stationNameTemplate = document.getElementById('station-name-tamplate');
         const template = document.getElementById('station-template');
         jsons.forEach(json => {
-            const li = document.createElement('li');
+            const id = `station-name-${json.number}`;
+            const clone = stationNameTemplate.content.cloneNode(true);
+            const li = clone.querySelector('li');
             li.style.marginLeft = `${left + 1}rem`;
-            const span = document.createElement('span');
-            span.textContent = document.querySelector(`[for="timetable-${json.number}"]`).textContent;
-            li.appendChild(span);
-            document.querySelector('#timetable-names').appendChild(li);
+            const checkbox = clone.querySelector('[type="checkbox"]');
+            checkbox.id = id;
+            checkbox.dataset.id = json.number;
+            const label = clone.querySelector('label');
+            label.setAttribute('for', id);
+            label.textContent = document.querySelector(`[for="timetable-${json.number}"]`).textContent;
+            document.getElementById('timetable-names').appendChild(clone);
 
             json.stations.forEach(station => {
                 const id = `station-${station.id}`;
