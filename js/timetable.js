@@ -1,3 +1,5 @@
+import {Diagram} from './Diagram.js';
+
 window.addEventListener('DOMContentLoaded', () => {
     const {routeName, routeId, stations, trains} = (() => {
         const routeName = sessionStorage.getItem('routeName');
@@ -134,8 +136,10 @@ window.addEventListener('DOMContentLoaded', () => {
             alert('時刻表を選択してください。');
             location.href = './';
         }
-        setStations();
-        setTrains();
+        // setStations();
+        // setTrains();
+
+        new Diagram(routeName, stations, trains);
     })();
 
     document.querySelectorAll('[name="direction"]').forEach(radio => {
