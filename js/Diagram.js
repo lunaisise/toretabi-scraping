@@ -14,7 +14,7 @@ class Diagram {
         this.#setStations(stations);
         this.#setTrains(trains);
 
-        console.log(this);
+        // console.log(this);
         return this;
     }
 
@@ -22,6 +22,7 @@ class Diagram {
         stations.forEach(station => {
             this.#stations.push(new Station(station.id, station.name));
         });
+        // console.log(this.#stations);
     }
 
     #setTrains(trains) {
@@ -34,6 +35,18 @@ class Diagram {
                 });
             });
         });
+    }
+
+    get routeName() {
+        return this.#routeName;
+    }
+
+    get stations() {
+        return this.#stations;
+    }
+
+    get trains() {
+        return this.#trains;
     }
 }
 
