@@ -59,3 +59,17 @@ th[rowspan="2"] {
     position: sticky;
     z-index: 1;
 }
+
+td {
+    width: 4.5rem;
+}
+
+tr[data-des="arr"] > th,
+tr[data-des="arr"] > td {
+    border-bottom-style: none;
+}
+
+tr[data-des="dep"] > th,
+tr[data-des="dep"] > td {
+    border-top-style: dashed;
+}
