@@ -1,5 +1,6 @@
 import {Station} from './Station.js';
 import {Train} from './Train.js';
+import {OuDia} from './OuDia.js';
 
 class Diagram {
     #routeName;
@@ -9,6 +10,13 @@ class Diagram {
         up: []
     };
 
+    /**
+     * コンストラクター
+     * @param {String} routeName 路線名
+     * @param {Array} stations 駅一覧
+     * @param {Object} trains 列車一覧
+     * @returns {Diagram} Diagram
+     */
     constructor(routeName, stations, trains) {
         this.#routeName = routeName;
         this.#setStations(stations);
@@ -18,6 +26,10 @@ class Diagram {
         return this;
     }
 
+    /**
+     * 駅情報をセット
+     * @param {Array} stations 駅一覧
+     */
     #setStations(stations) {
         stations.forEach(station => {
             this.#stations.push(new Station(station.id, station.name));
@@ -25,6 +37,10 @@ class Diagram {
         // console.log(this.#stations);
     }
 
+    /**
+     * 列車情報をセット
+     * @param {Object} trains 列車一覧
+     */
     #setTrains(trains) {
         Object.keys(trains).forEach(direction => {
             Object.keys(trains[direction]).forEach(timetableNumber => {
@@ -35,6 +51,10 @@ class Diagram {
                 });
             });
         });
+    }
+
+    toOuDia() {
+        OuDia(this);
     }
 
     get routeName() {

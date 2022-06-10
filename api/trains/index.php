@@ -132,8 +132,20 @@ foreach ($train_ids as $train_id) {
 
     preg_match("/\<dt\>([\s\S]+)\<\/dt\>/", $body, $m);
     $type = null;
+    $announce_number = null;
+    $train_name = null;
     if ($m) {
         $type = trim($m[1]);
+        preg_match("/([\s\S]+)\s(\d+)号$/", $type, $m);
+        if ($m) {
+            $type = trim($m[1]);
+            $announce_number = (int)$m[2];
+        }
+        preg_match("", $type, $m);
+        if ($m) {
+            $type = $m[1];
+            $train_name = $m[2];
+        }
     }
 
     preg_match("/<dd><strong>【([\s\S]+)\s発\s\〜\s([\s\S]+)\s行】/", $body, $m);
@@ -150,7 +162,20 @@ foreach ($train_ids as $train_id) {
         $number = $m[1];
     }
 
-    $operate_day = null;
+    preg_match("/<dd><strong>【運転日注意】<\/strong>/", $body, $m);
+    $operate_day = array(
+        "weekday" => true,
+        "weekend" => true,
+        "other" => false
+    );
+    if ($m) {
+        preg_match("/<dd><strong>【運転日注意】<\/strong><br>(土曜・休日|平日)のみ運転/", $body, $m);
+        if ($m) {
+            $operate_day[$m[1] === "平日" ? "weekend" : "weekday"] = false;
+        } else {
+            $operate_day["other"] = true;
+        }
+    }
 
     $train_stations = array();
     $tables = explode("</table>", $body);
@@ -188,6 +213,9 @@ foreach ($train_ids as $train_id) {
     $trains[] = array(
         "id" => (int)$train_id,
         "number" => $number,
+        "type" => $type,
+        "train_name" => $train_name,
+        "announce_number" => $announce_number,
         "from" => $from,
         "to" => $to,
         "operate_day" => $operate_day,

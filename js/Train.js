@@ -1,6 +1,7 @@
 class Train {
     #id;
     #number;
+    #type;
     #operateDay;
     #stations = [];
     #from;
@@ -17,6 +18,7 @@ class Train {
         // console.log({stations, timetableStations, train});
         this.#id = train.id;
         this.#number = train.number;
+        this.#type = train.type;
         this.#operateDay = train.operate_day;
         this.#from = train.from;
         this.#to = train.to;
@@ -50,6 +52,10 @@ class Train {
 
     get number() {
         return this.#number;
+    }
+
+    get type() {
+        return this.#type;
     }
 
     get stations() {
